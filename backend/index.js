@@ -31,17 +31,22 @@ app.get('/todos',async (req,res)=>{
 })
 
 app.put('/completed',async (req,res)=>{
-    const valid = updateTodo.safeParse(req.body);
+    const updateInputs = req.body;
+    const valid = updateTodo.safeParse(updateInputs);
     if(!valid){
         res.status(411).send({
             msg : "You sent the wrong inputs",
         })
     }
-    await Todo.update({
-        _id : req.body.id
+    await Todo.updateOne({
+        _id : updateInputs._id
     },{
         completed : true
     })
+    res.json({
+        msg : "Todo Updated"
+    })
+
 })
 
 app.listen(3000);
