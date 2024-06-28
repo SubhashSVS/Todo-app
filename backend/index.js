@@ -1,29 +1,47 @@
 const express = require('express');
 const {createTodo, updateTodo} = require('./types');
+const {Todo} = require('./db')
 
 const app = express();
 app.use(express.json());
 
-app.post('/todo',(req,res)=>{
-    const valid = createTodo.safeParse(req.body);
+app.post('/todo',async (req,res)=>{
+    const createInputs = req.body;
+    const valid = createTodo.safeParse(createInputs);
     if(!valid.success){
         res.status(411).send({
             msg : "You sent the wrong inputs",
         })
     }
+    await Todo.create({
+        title : createInputs.title,
+        description : createInputs.description,
+        completed : false
+    })
+    res.json({
+        msg : "Todo Created"
+    })
 })
 
-app.get('/todos',(req,res)=>{
-
+app.get('/todos',async (req,res)=>{
+    const todos = await Todo.find({});
+    res.json({
+        todos
+    })
 })
 
-app.put('/completed',(req,res)=>{
+app.put('/completed',async (req,res)=>{
     const valid = updateTodo.safeParse(req.body);
     if(!valid){
         res.status(411).send({
             msg : "You sent the wrong inputs",
         })
     }
+    await Todo.update({
+        _id : req.body.id
+    },{
+        completed : true
+    })
 })
 
 app.listen(3000);
